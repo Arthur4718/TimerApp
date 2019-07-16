@@ -19,7 +19,7 @@ class PrefUtil {
             return 1
         }
 
-        private const val PREVIOUS_TIMER_LENGHT_SECONDS_ID = "com.devarthur718.timerkotlin.previous_time_lenght"
+        private const val PREVIOUS_TIMER_LENGHT_SECONDS_ID = "com.devarthur4718.timerkotlin.previous_time_lenght"
 
         fun getPreviousTimerLenghtInSeconds(context : Context): Long{
             val prefereces = PreferenceManager.getDefaultSharedPreferences(context)
@@ -34,11 +34,12 @@ class PrefUtil {
             editor.apply()
         }
 
-        private const val TIMER_STATE_ID = "com.devarthur718.timerkotlin.timer_state"
+        private const val TIMER_STATE_ID = "com.devarthur4718.timerkotlin.timer_state"
 
-        fun getPreviusTimerLenghtSeconds(context: Context) : Long{
-            val prefereces = PreferenceManager.getDefaultSharedPreferences(context)
-            return prefereces.getLong(TIMER_STATE_ID, 0 )
+        fun getTimerState(context: Context) : MainActivity.TimerState{
+            val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+            val ordinal = preferences.getInt(TIMER_STATE_ID, 0)
+            return MainActivity.TimerState.values()[ordinal]
         }
 
         fun setTimerState(state : MainActivity.TimerState, context: Context){
@@ -49,18 +50,18 @@ class PrefUtil {
             editor.apply()
         }
 
-        private const val SECONDS_REMAINING_ID = "com.devarthur718.timerkotlin.seconds_remaining"
+        private const val SECONDS_REMAINING_ID = "com.devarthur4718.timerkotlin.seconds_remaining"
 
         fun getSecondsRemaining(context : Context): Long{
             val prefereces = PreferenceManager.getDefaultSharedPreferences(context)
-            return prefereces.getLong(PREVIOUS_TIMER_LENGHT_SECONDS_ID, 0 )
+            return prefereces.getLong(SECONDS_REMAINING_ID, 0 )
 
         }
 
         fun setSecondsRemaining(seconds : Long, context: Context){
 
             val editor = PreferenceManager.getDefaultSharedPreferences(context).edit()
-            editor.putLong(PREVIOUS_TIMER_LENGHT_SECONDS_ID, seconds)
+            editor.putLong(SECONDS_REMAINING_ID, seconds)
             editor.apply()
         }
 

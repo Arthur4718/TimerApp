@@ -5,9 +5,12 @@ import android.os.CountDownTimer
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu
 import android.view.MenuItem
+import com.devarthur.timerkotlin.util.PrefUtil
 
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.content_main.*
 
+//From: https://www.youtube.com/watch?v=VnRxq4Fpl64&t=143s
 class MainActivity : AppCompatActivity() {
 
     enum class TimerState{
@@ -68,6 +71,107 @@ class MainActivity : AppCompatActivity() {
         }else if (timerState == TimerState.Paused){
             //Todo show notification
         }
+
+        PrefUtil.setPreviousTimerLenghtInSeconds(timerLenghtSeconds, this@MainActivity)
+        PrefUtil.setSecondsRemaining(secondsRemaining, this@MainActivity)
+        PrefUtil.setTimerState(timerState, this@MainActivity)
+    }
+
+    private fun initTimer(){
+        timerState = PrefUtil.getTimerState(this@MainActivity)
+
+        if(timerState == TimerState.Stopped)
+            setNewTimerLength()
+        else
+            setPreviusTimerLenght()
+
+        secondsRemaining = if(timerState == TimerState.Running || timerState == TimerState.Paused)
+            PrefUtil.getSecondsRemaining(this@MainActivity)
+        else
+            timerLenghtSeconds
+
+        //TODO : change secondsRemaining while in background.
+
+        if(timerState == TimerState.Running)
+            startTimer()
+
+        updateButtons()
+        updateCountDownUI()
+    }
+
+    private fun onTimerFinished(){
+        timerState = TimerState.Stopped
+
+        setNewTimerLength()
+
+        //Progress..
+
+        PrefUtil.setSecondsRemaining(timerLenghtSeconds, this)
+        secondsRemaining = timerLenghtSeconds
+
+        updateButtons()
+        updateCountDownUI()
+
+    }
+
+    private fun updateButtons(){
+
+        when(timerState){
+            TimerState.Running -> {
+                fab_play.isEnabled = false
+                fab_pause.isEnabled = true
+                fab_stop.isEnabled = true
+            }
+
+            TimerState.Stopped -> {
+                fab_play.isEnabled = true
+                fab_pause.isEnabled = false
+                fab_stop.isEnabled = false
+
+            }
+            TimerState.Paused -> {
+                fab_play.isEnabled = true
+                fab_pause.isEnabled = false
+                fab_stop.isEnabled = true
+            }
+        }
+
+    }
+
+    private fun startTimer(){
+        timerState = TimerState.Running
+
+        timer = object : CountDownTimer(secondsRemaining / 1000 , 1000){
+            override fun onFinish() { onTimerFinished() }
+
+            override fun onTick(millisUntilFinished: Long) {
+                secondsRemaining = millisUntilFinished / 1000
+                updateCountDownUI()
+            }
+
+        }.start()
+
+
+    }
+
+    private fun setNewTimerLength(){
+        val lengthInMinutes = PrefUtil.getTimerLenght(this@MainActivity)
+        timerLenghtSeconds = (lengthInMinutes * 60L)
+
+    }
+    private fun setPreviusTimerLenght(){
+        timerLenghtSeconds = PrefUtil.getPreviousTimerLenghtInSeconds(this@MainActivity)
+    }
+
+    private fun updateCountDownUI(){
+        val minutesUntilFinished = secondsRemaining / 60
+        val secondsInMinuteUntilFinished = secondsRemaining - minutesUntilFinished * 60
+        val secondsStr = secondsInMinuteUntilFinished.toString()
+
+        tvTimerCountdown.text = "$minutesUntilFinished:${
+        if (secondsStr.length == 2) secondsStr
+        else "0" + secondsStr
+        }"
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
