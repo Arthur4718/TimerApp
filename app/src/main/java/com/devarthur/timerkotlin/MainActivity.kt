@@ -1,6 +1,7 @@
 package com.devarthur.timerkotlin
 
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu
 import android.view.MenuItem
@@ -9,15 +10,64 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
+    enum class TimerState{
+        Stopped, Paused, Running
+    }
+
+    private lateinit var timer : CountDownTimer
+    private var timerLenghtSeconds =  0L
+    private var timerState = TimerState.Stopped
+    private var secondsRemaining = 0L
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-//        fab.setOnClickListener { view ->
-//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                .setAction("Action", null).show()
-//        }
+        supportActionBar?.setIcon(R.drawable.ic_timer_black_24dp)
+        supportActionBar?.title = "      Timer"
+
+
+        fab_play.setOnClickListener { v ->
+            startTimer()
+            timerState = TimerState.Running
+            updateButtons()
+
+        }
+
+        fab_pause.setOnClickListener { v ->
+            timer.cancel()
+            timerState = TimerState.Paused
+            updateButtons()
+        }
+
+        fab_stop.setOnClickListener { v ->
+            timer.cancel()
+            onTimerFinished()
+
+        }
+
+
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        initTimer()
+
+        //Todo : remove background timer, hide nofitication.
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        if(timerState == TimerState.Running){
+            timer.cancel()
+            //Todo : start background timer and show notificatio
+        }else if (timerState == TimerState.Paused){
+            //Todo show notification
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
